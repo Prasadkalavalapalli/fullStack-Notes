@@ -1,0 +1,335 @@
+# React Native Q&A Notes
+
+## **1. What is React Native?**
+**Answer:** React Native is a framework developed by Facebook that allows you to build mobile apps for iOS and Android using JavaScript and React. Unlike hybrid apps that run in a webview, React Native apps use **native components** (real iOS/Android UI elements) while the logic runs in JavaScript.
+
+---
+
+## **2. How does React Native work?**
+**Answer:** React Native uses a "bridge" that allows JavaScript code to communicate with native modules. The UI runs on the main thread, while JavaScript runs on a separate thread. When you write React components, they get translated to native views.
+
+---
+
+## **3. What are the main advantages of React Native?**
+**Answer:**
+- **Code Reuse:** Write once, run on both iOS and Android
+- **Hot Reloading:** See changes instantly without recompiling
+- **Native Performance:** Uses real native components (not webviews)
+- **Large Community:** Many libraries and resources available
+- **JavaScript Knowledge:** Uses familiar React/JavaScript concepts
+
+---
+
+## **4. What are the limitations of React Native?**
+**Answer:**
+- **Performance:** Complex animations may not be as smooth as fully native apps
+- **Native Code:** Some advanced features may require writing native code
+- **App Size:** Larger file size compared to fully native apps
+- **Updates:** New OS features may take time to be supported
+
+---
+
+## **5. How do you set up a React Native project?**
+**Answer:** You can use either:
+```bash
+# Method 1: React Native CLI (more control)
+npx react-native init MyProject
+
+# Method 2: Expo (easier setup)
+npx create-expo-app MyProject
+```
+
+---
+
+## **6. What are the core components in React Native?**
+**Answer:** The essential components are:
+- **View:** Container similar to HTML div
+- **Text:** For displaying text
+- **Image:** For showing images
+- **ScrollView:** Scrollable container
+- **TextInput:** For user text input
+- **Button:** Basic button component
+
+---
+
+## **7. How do you style components in React Native?**
+**Answer:** Using JavaScript objects with the StyleSheet API:
+```jsx
+import { StyleSheet } from 'react-native';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 20,
+  },
+  text: {
+    fontSize: 16,
+    color: '#333',
+  },
+});
+
+// Usage
+<View style={styles.container}>
+  <Text style={styles.text}>Hello World</Text>
+</View>
+```
+
+---
+
+## **8. How does layout work in React Native?**
+**Answer:** React Native uses **Flexbox** for layout, similar to CSS Flexbox but with some differences:
+- Default `flexDirection` is `column` instead of `row`
+- No float or position properties like CSS
+- Uses `alignItems`, `justifyContent`, `flex` properties
+
+---
+
+## **9. How do you handle user input?**
+**Answer:** Using the TextInput component and state:
+```jsx
+import { useState } from 'react';
+import { TextInput } from 'react-native';
+
+const MyComponent = () => {
+  const [text, setText] = useState('');
+  
+  return (
+    <TextInput
+      value={text}
+      onChangeText={setText}
+      placeholder="Type something"
+    />
+  );
+};
+```
+
+---
+
+## **10. How do you navigate between screens?**
+**Answer:** Using React Navigation library:
+```bash
+npm install @react-navigation/native @react-navigation/stack
+```
+
+```jsx
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+const Stack = createStackNavigator();
+
+function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Details" component={DetailsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+```
+
+---
+
+## **11. How do you manage state in React Native?**
+**Answer:** Using React hooks like useState and useEffect:
+```jsx
+import { useState, useEffect } from 'react';
+
+const MyComponent = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    // Your data fetching logic
+  };
+
+  return (
+    // Your component JSX
+  );
+};
+```
+
+---
+
+## **12. How do you make API calls?**
+**Answer:** Using fetch or libraries like axios:
+```jsx
+const fetchData = async () => {
+  try {
+    const response = await fetch('https://api.example.com/data');
+    const data = await response.json();
+    setData(data);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+```
+
+---
+
+## **13. How do you handle platform-specific code?**
+**Answer:** Using the Platform module:
+```jsx
+import { Platform, StyleSheet } from 'react-native';
+
+const styles = StyleSheet.create({
+  container: {
+    padding: Platform.OS === 'ios' ? 20 : 10,
+  },
+});
+
+// Or component-specific
+if (Platform.OS === 'ios') {
+  return <IOSComponent />;
+} else {
+  return <AndroidComponent />;
+}
+```
+
+---
+
+## **14. How do you debug React Native apps?**
+**Answer:** Several methods:
+- **React Native Debugger:** Standalone app
+- **Chrome DevTools:** Debug JavaScript in Chrome
+- **Flipper:** Desktop debugging platform
+- **Console logs:** Using `console.log()`
+
+---
+
+## **15. How do you test React Native apps?**
+**Answer:** Using testing libraries:
+```bash
+npm install --save-dev @testing-library/react-native jest
+```
+
+```jsx
+import { render, fireEvent } from '@testing-library/react-native';
+import MyComponent from './MyComponent';
+
+test('button press works', () => {
+  const { getByText } = render(<MyComponent />);
+  fireEvent.press(getByText('Press me'));
+  // Your assertions
+});
+```
+
+---
+
+## **16. How do you deploy React Native apps?**
+**Answer:** Different processes for each platform:
+
+**Android:**
+1. Generate signing key
+2. Create release build: `cd android && ./gradlew assembleRelease`
+3. Upload to Google Play Store
+
+**iOS:**
+1. Create App ID in Apple Developer Portal
+2. Create provisioning profile
+3. Archive build in Xcode
+4. Upload to App Store Connect
+
+---
+
+## **17. What is the difference between React Native and React?**
+**Answer:**
+- **React** is for web applications and uses HTML elements
+- **React Native** is for mobile apps and uses native components
+- React Native doesn't use HTML/CSS but similar concepts
+- Both use the same React principles (components, props, state)
+
+---
+
+## **18. What is the difference between React Native and Flutter?**
+**Answer:**
+- **React Native:** JavaScript, uses native components, larger community
+- **Flutter:** Dart language, uses its own rendering engine, consistent UI across platforms
+- React Native has better JavaScript ecosystem integration
+- Flutter may have slightly better performance for some use cases
+
+---
+
+## **19. How do you optimize React Native app performance?**
+**Answer:**
+- Use `FlatList` instead of `ScrollView` for long lists
+- Use `React.memo()` to prevent unnecessary re-renders
+- Use `useCallback` and `useMemo` hooks
+- Optimize images with appropriate sizes
+- Avoid inline functions in render methods
+
+---
+
+## **20. How do you handle offline storage?**
+**Answer:** Using AsyncStorage or more advanced solutions:
+```bash
+npm install @react-native-async-storage/async-storage
+```
+
+```jsx
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Store data
+await AsyncStorage.setItem('key', 'value');
+
+// Retrieve data
+const value = await AsyncStorage.getItem('key');
+```
+
+---
+
+## **21. How do you handle push notifications?**
+**Answer:** Using libraries like react-native-push-notification:
+```bash
+npm install react-native-push-notification
+```
+
+Requires additional native configuration for both iOS and Android.
+
+---
+
+## **22. How do you access device features like camera or GPS?**
+**Answer:** Using community packages:
+```bash
+# For camera
+npm install react-native-camera
+
+# For GPS
+npm install @react-native-community/geolocation
+```
+
+These packages provide JavaScript interfaces to native device capabilities.
+
+---
+
+## **23. What is Hot Reloading and Live Reloading?**
+**Answer:**
+- **Hot Reloading:** Inject updated files without losing app state
+- **Live Reloading:** Reload the entire app when files change
+- Hot reloading is better for development as it preserves state
+
+---
+
+## **24. How do you handle different screen sizes?**
+**Answer:** Using responsive techniques:
+- Use `Dimensions` API to get screen size
+- Use percentage values or flexbox
+- Use `PixelRatio` for density-aware sizing
+- Consider using responsive UI libraries
+
+---
+
+## **25. How do you update React Native versions?**
+**Answer:** Using the React Native Upgrade Helper:
+1. Visit https://react-native-community.github.io/upgrade-helper/
+2. Select your current and target versions
+3. Follow the diff instructions for your project files
+4. Run `npx react-native run-android/ios` to test
+
+This format provides clear, concise answers to common React Native questions in an easy-to-reference Q&A style.
