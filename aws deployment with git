@@ -1,0 +1,244 @@
+backend deployment with github autoupdate 
+First GitHub lo backend code push cheyadaniki mee project folder open chesi Git Bash lo `git init` run cheyali, tarvatha `git remote -v` tho repository unda leda check cheyali.
+Repository lekapothe `git remote add origin https://github.com/username/repo.git` tho add cheyali. 
+Next `git add .` tho files add chesi, `git commit -m "Updated my code"` ani commit chesi, `git push -u origin main` tho code ni GitHub ki push cheyali.
+
+Tarvatha AWS lo EC2 instance create chesaka, aa instance ki connect avvadaniki `ssh -i "your-key.pem" ubuntu@your-ec2-public-ip` command use cheyali.
+Connect ayyaka instance lo `sudo apt update && sudo apt upgrade -y` run chesi system update cheyali.
+Tarvatha `sudo apt install git -y` tho Git install chesi, `sudo apt install openjdk-17-jdk -y` tho Java install cheyali (Spring Boot ki required). 
+React frontend use chesthe `sudo apt install nodejs npm -y` install cheyali.
+
+Next step lo GitHub repo ni EC2 lo clone cheyali using `git clone https://github.com/username/repo.git` and `cd repo` command tho project folder lo ki vellali.
+Appudu Maven project ayithe `mvn clean install` run chesi build cheyali. Build ayyaka application run cheyadaniki `java -jar target/your-app-name.jar` use cheyali. 
+App run ayyaka browser lo `http://<EC2-IP>:8080` tho access cheyachu. App ni stop cheyadaniki Ctrl + C use cheyali, lekapothe background lo run cheyadaniki `nohup java -jar target/*.jar > app.log 2>&1 &` command use cheyali. 
+Logs chudataniki `tail -f app.log` use cheyachu.
+
+Application proper ga run avvadaniki `application.properties` lo `server.port=8080` and `server.address=0.0.0.0` set cheyali.
+AWS Security Group lo 22, 8080, 9000 ports open cheyali. Auto deploy kosam EC2 lo `deploy.sh` file create chesi,
+andulo repo folder ki navigate ayi `git pull origin main`, `mvn clean install`, old process stop chesi, malli `nohup java -jar target/*.jar > app.log 2>&1 &` run cheyali.
+Tarvatha `chmod +x deploy.sh` tho executable ga marchali.
+
+Webhook setup kosam `sudo apt install webhook -y` install chesi, `hooks.json` file create chesi deploy command map cheyali.
+Webhook server ni `webhook -hooks hooks.json -port 9000` tho run cheyali. 
+GitHub lo repo → Settings → Webhooks lo payload URL ga `http://<EC2-IP>:9000/hooks/deploy-backend` add chesi, content type `application/json` set chesi “Just push events” select cheyali. 
+Ippudu eppudu GitHub lo code push chesina, webhook trigger ayi automatic ga EC2 lo code pull ayi build ayi application restart avutundi 👍
+
+frontend deployment with github autoupdated
+1. EC2 ki connect avvali
+   ssh -i "your-key.pem" ubuntu@your-ec2-ip
+
+2. Required packages install cheyali
+   sudo apt update && sudo apt upgrade -y
+   sudo apt install nginx git nodejs npm -y
+
+3. Nginx start cheyali
+   sudo systemctl start nginx
+   sudo systemctl enable nginx
+
+4. Rendu frontend apps kosam folders create cheyali
+   sudo mkdir -p /var/www/app1
+   sudo mkdir -p /var/www/app2
+
+5. GitHub nundi projects clone cheyali
+   cd /home/ubuntu
+   git clone [https://github.com/username/app1.git](https://github.com/username/app1.git)
+   git clone [https://github.com/username/app2.git](https://github.com/username/app2.git)
+
+6. App1 build cheyali
+   cd app1
+   npm install
+   npm run build
+   sudo cp -r build/* /var/www/app1/
+
+7. App2 build cheyali
+   cd ../app2
+   npm install
+   npm run build
+   sudo cp -r build/* /var/www/app2/
+
+8. App1 kosam nginx config create cheyali
+   sudo nano /etc/nginx/sites-available/app1
+
+server {
+listen 80;
+server_name app1.evyaa.com;
+
+```
+root /var/www/app1;  
+index index.html;  
+
+location / {  
+    try_files $uri $uri/ /index.html;  
+}  
+```
+
+}
+
+9. App2 kosam nginx config create cheyali
+   sudo nano /etc/nginx/sites-available/app2
+
+server {
+listen 80;
+server_name app2.evyaa.com;
+
+```
+root /var/www/app2;  
+index index.html;  
+
+location / {  
+    try_files $uri $uri/ /index.html;  
+}  
+```
+
+}
+
+10. Configs enable cheyali
+    sudo ln -s /etc/nginx/sites-available/app1 /etc/nginx/sites-enabled/
+    sudo ln -s /etc/nginx/sites-available/app2 /etc/nginx/sites-enabled/
+    sudo rm /etc/nginx/sites-enabled/default
+    sudo nginx -t
+    sudo systemctl restart nginx
+
+11. DNS lo records add cheyali
+    app1 → EC2 IP
+    app2 → EC2 IP
+
+12. SSL install cheyali
+    sudo apt install certbot python3-certbot-nginx -y
+    sudo certbot --nginx -d app1.evyaa.com -d app2.evyaa.com
+
+13. App1 deploy script create cheyali
+    nano /home/ubuntu/app1/deploy.sh
+
+#!/bin/bash
+cd /home/ubuntu/app1
+git pull origin main
+npm install
+npm run build
+sudo cp -r build/* /var/www/app1/
+
+chmod +x /home/ubuntu/app1/deploy.sh
+
+14. App2 deploy script create cheyali
+    nano /home/ubuntu/app2/deploy.sh
+
+#!/bin/bash
+cd /home/ubuntu/app2
+git pull origin main
+npm install
+npm run build
+sudo cp -r build/* /var/www/app2/
+
+chmod +x /home/ubuntu/app2/deploy.sh
+
+15. Webhook install cheyali
+    sudo apt install webhook -y
+
+16. hooks.json create cheyali
+    nano /home/ubuntu/hooks.json
+
+[
+{
+"id": "deploy-app1",
+"execute-command": "/home/ubuntu/app1/deploy.sh"
+},
+{
+"id": "deploy-app2",
+"execute-command": "/home/ubuntu/app2/deploy.sh"
+}
+]
+
+17. Webhook run cheyali
+    nohup webhook -hooks /home/ubuntu/hooks.json -port 9000 > webhook.log 2>&1 &
+
+18. AWS security group lo port 9000 open cheyali
+
+19. GitHub webhook add cheyali
+    App1 → [http://EC2-IP:9000/hooks/deploy-app1](http://EC2-IP:9000/hooks/deploy-app1)
+    App2 → [http://EC2-IP:9000/hooks/deploy-app2](http://EC2-IP:9000/hooks/deploy-app2)
+    method POST
+    trigger push events
+
+20. Test cheyali
+    git add .
+    git commit -m "update"
+    git push origin main
+
+21. Flow
+    GitHub push → webhook trigger → EC2 git pull → build → nginx serve updated app 👍
+
+webhooks runing unaya laydhu untey logs chuda ala
+Webhook running unda check cheyadaniki:
+ps aux | grep webhook
+
+output lo webhook process kanipinchali
+kanipinchakapothe start cheyali:
+nohup webhook -hooks /home/ubuntu/hooks.json -port 9000 > webhook.log 2>&1 &
+
+Webhook logs chudataniki:
+tail -f webhook.log
+
+
+backend App running lo unda leda check cheyadaniki:
+
+ps aux | grep java
+
+👉 java process kanipisthe app running lo undi
+👉 kanipinchakapothe run cheyali
+
+App run cheyadaniki:
+
+cd /home/ubuntu/repo
+nohup java -jar target/*.jar > app.log 2>&1 &
+
+Logs chudataniki:
+
+tail -f app.log
+
+👉 error unte ikkada kanipistundi
+
+App stop cheyadaniki:
+
+pkill -f 'java -jar'
+
+Restart flow:
+
+pkill -f 'java -jar'
+nohup java -jar target/*.jar > app.log 2>&1 &
+
+Port lo run avutunda check:
+
+lsof -i :8080
+
+
+Frontend running unda check:
+1. nginx running unda check
+   sudo systemctl status nginx
+
+2. run kakapothe start chey
+   sudo systemctl start nginx
+
+3. frontend files unnaya check
+   ls /var/www/app1
+
+4. index.html undali (important)
+
+5. browser lo check
+   [http://app1.evyaa.com](http://app1.evyaa.com)
+
+6. nginx logs check
+   sudo tail -f /var/log/nginx/error.log
+
+7. changes reflect kakapothe build malli chey
+   cd /home/ubuntu/app1
+   npm run build
+
+8. build files copy chey
+   sudo cp -r build/* /var/www/app1/
+
+9. nginx restart chey
+   sudo systemctl restart nginx
+
+10. malli browser lo check 👍
+
+                                                  ---------------------THE END---------------------
